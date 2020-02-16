@@ -35,7 +35,7 @@ class Visualizer():
         self.track_width = rospy.get_param(self.param_name_track_width, 600)
         self.camera_center = rospy.get_param(self.param_name_camera_center, 320)
 
-        self.img = np.zeros(shape=[480, 640, 4], dtype=np.uint8)
+        self.img = np.zeros(shape=[480, 640, 3], dtype=np.uint8)
         self.width = 640
         self.height = 480
         self.pos = self.camera_center
@@ -73,21 +73,24 @@ class Visualizer():
         self.height = img_msg.height
 
         np_arr = np.frombuffer(img_msg.data, dtype=np.uint8)
-        gray = np_arr.reshape((self.height, self.width, 1))
 
-        #rospy.loginfo("Image with shape {:s} received. (max, min)=({:d}, {:d})".format(str(gray.shape), gray.min(), gray.max()))
+        if img_msg.encoding == '8UC1':
+            gray = np_arr.reshape((self.height, self.width, 1))
+            self.img = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)
+        elif img_msg.encoding == 'bgr8':
+            self.img = np_arr.reshape((self.height, self.width, 3))
 
-        self.img = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGBA)
+        rospy.loginfo("Image with shape {:s} received.".format(str(self.img.shape)))
 
 
     def pos_err_callback(self, err_msg):
         self.pos = int(err_msg.position.x)
-        #rospy.loginfo("Get position info: {:d}".format(self.pos))
+        rospy.loginfo("Get posit info: {:d}".format(self.pos))
 
     def pos_track_callback(self, track_msg):
         self.left = int(track_msg.left)
         self.right = int(track_msg.right)
-        #rospy.loginfo("Get track info: {:d}, {:d}".format(self.left, self.right))
+        rospy.loginfo("Get track info: {:d}, {:d}".format(self.left, self.right))
 
     def plot(self):
         img = self.img.copy()
@@ -96,8 +99,8 @@ class Visualizer():
 
         cv2.line(img, (0, self.scan_line), (width, self.scan_line), (255,255,255), self.line_width_params)
         cv2.line(img, (self.camera_center, self.scan_line-20), (self.camera_center, self.scan_line+20), (0,255,255), self.line_width_params)
-        cv2.line(img, (self.camera_center-self.track_width//2, self.scan_line-20), (self.camera_center-self.track_width//2, self.scan_line+20), (0,0,255,0.4), self.line_width_params)
-        cv2.line(img, (self.camera_center+self.track_width//2, self.scan_line-20), (self.camera_center+self.track_width//2, self.scan_line+20), (0,0,255,0.4), self.line_width_params)
+        cv2.line(img, (self.camera_center-self.track_width//2, self.scan_line-20), (self.camera_center-self.track_width//2, self.scan_line+20), (0,0,255), self.line_width_params)
+        cv2.line(img, (self.camera_center+self.track_width//2, self.scan_line-20), (self.camera_center+self.track_width//2, self.scan_line+20), (0,0,255), self.line_width_params)
 
         cv2.line(img, (self.camera_center-self.pos, 0), (self.camera_center-self.pos, height), (255,0,255), self.line_width_indicator)
         if(self.left):
