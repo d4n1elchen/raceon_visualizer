@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <arg name="speed" default="0"/>
+    
+    <group ns="raceon">
+
+        <node pkg="raceon_visualizer" name="visualizer" type="visualizer.py" output="screen">
+            <param name="~topic_name_camera_image" value="camera/image" />
+            <param name="~topic_name_position_error" value="position/error" />
+            <param name="~topic_name_position_track" value="position/track" />
+            <param name="~param_name_scan_line" value="pos_estimation/scan_line" />
+            <param name="~param_name_track_width" value="pos_estimation/track_width" />
+            <param name="~param_name_camera_center" value="pos_estimation/camera_center" />
+        </node>
+
+    </group>
+</launch>
