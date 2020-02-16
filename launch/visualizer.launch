@@ -4,7 +4,7 @@
     
     <group ns="raceon">
 
-        <node pkg="raceon_visualizer" name="visualizer" type="visualizer.py" output="screen">
+        <node pkg="raceon_visualizer" name="visualizer" type="visualizer.py" output="log">
             <param name="~topic_name_camera_image" value="camera/image" />
             <param name="~topic_name_position_error" value="position/error" />
             <param name="~topic_name_position_track" value="position/track" />
