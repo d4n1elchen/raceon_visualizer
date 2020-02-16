@@ -5,16 +5,21 @@
 import rospy
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Pose
-from raceon.msg import TrackPosition
+from std_msgs.msg import Bool
+from raceon.msg import TrackPosition, AckermannDrive
 
 # Dependencies for visualization
 import time
 import cv2
 import numpy as np
 
+# Manual control
+from manual import Controller
+from pynput.keyboard import Listener
+
 class Visualizer():
 
-    def __init__(self):
+    def __init__(self, controller):
         # Topic name
         self.topic_name_camera_image = rospy.get_param("~topic_name_camera_image", "camera/image")
         self.topic_name_pos_err = rospy.get_param("~topic_name_position_error", "position/error")
@@ -44,14 +49,24 @@ class Visualizer():
         self.time = 0
         self.fps = 0
 
+        # Mannual mode
+        self.controller = controller
+        self.topic_name_manual_mode = rospy.get_param("~topic_name_manual_mode", "control/manual_mode")
+        self.topic_name_control = rospy.get_param("~topic_name_control", "control")
+        self.manual_mode = False
+
     def start(self):
         self.sub_camera = rospy.Subscriber(self.topic_name_camera_image, Image, self.image_callback)
         self.sub_pos_err = rospy.Subscriber(self.topic_name_pos_err, Pose, self.pos_err_callback)
         self.sub_pos_track = rospy.Subscriber(self.topic_name_pos_track, TrackPosition, self.pos_track_callback)
+        self.pub_manual_mode = rospy.Publisher(self.topic_name_manual_mode, Bool, queue_size=10)
+        self.pub_control = rospy.Publisher(self.topic_name_control, AckermannDrive, queue_size=10)
         #rospy.spin()
         self.terminate = False
         while not self.terminate:
             self.plot()
+            if self.manual_mode:
+                self.pub_control.publish(controller.get_msg())
 
     def image_callback(self, img_msg):
         self.width = img_msg.width
@@ -97,18 +112,30 @@ class Visualizer():
             self.fps = 10 / (time.time() - self.time)
         cv2.putText(img, f"{self.fps:.3f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,0), 2)
 
+        if self.manual_mode:
+            speed = controller.get_default_speed()
+            cv2.putText(img, f"Manual mode: ON, speed = {speed:d}", (10, height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
+
         cv2.imshow("Visualizer", img)
         key = cv2.waitKey(33)
 
         if key == ord('q'):
             self.terminate = True
+        elif key == ord('m'):
+            self.manual_mode = not self.manual_mode
+            self.pub_manual_mode.publish(Bool(data=self.manual_mode))
 
 if __name__ == "__main__":
     cv2.namedWindow("Visualizer")
     rospy.init_node("visualizer")
-    visualizer = Visualizer()
+    controller = Controller()
+    listener = Listener(on_press=controller.on_press, on_release=controller.on_release)
+    listener.start()
+
+    visualizer = Visualizer(controller)
     try:
         visualizer.start()
     except rospy.ROSInterruptException:
         pass
     cv2.destroyAllWindows()
+    listener.stop()
