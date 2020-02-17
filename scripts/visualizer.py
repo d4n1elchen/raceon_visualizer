@@ -80,17 +80,12 @@ class Visualizer():
         elif img_msg.encoding == 'bgr8':
             self.img = np_arr.reshape((self.height, self.width, 3))
 
-        rospy.loginfo("Image with shape {:s} received.".format(str(self.img.shape)))
-
-
     def pos_err_callback(self, err_msg):
         self.pos = int(err_msg.position.x)
-        rospy.loginfo("Get posit info: {:d}".format(self.pos))
 
     def pos_track_callback(self, track_msg):
         self.left = int(track_msg.left)
         self.right = int(track_msg.right)
-        rospy.loginfo("Get track info: {:d}, {:d}".format(self.left, self.right))
 
     def plot(self):
         img = self.img.copy()
@@ -140,5 +135,8 @@ if __name__ == "__main__":
         visualizer.start()
     except rospy.ROSInterruptException:
         pass
+
     cv2.destroyAllWindows()
+
+    rospy.loginfo("Program end.")
     listener.stop()

@@ -13,6 +13,7 @@ class Controller:
 
         self.speed = 0
         self.steering = 0
+        self.terminate = False
 
     def on_press(self, key):
         if key == KeyCode.from_char('u'):
@@ -33,6 +34,8 @@ class Controller:
             self.speed = 0
         elif key == KeyCode.from_char('h') or key == KeyCode.from_char('k'):
             self.steering = 0
+        elif key == KeyCode.from_char('q'):
+            self.terminate = True
 
     def get_msg(self):
         control_msg = AckermannDrive()
@@ -51,3 +54,6 @@ class Controller:
 
     def set_default_steering(self, val):
         self.default_steering = val
+
+    def is_terminated(self):
+        return self.terminate
