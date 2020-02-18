@@ -56,9 +56,9 @@ class Visualizer():
         self.manual_mode = False
 
     def start(self):
-        self.sub_camera = rospy.Subscriber(self.topic_name_camera_image, Image, self.image_callback)
-        self.sub_pos_err = rospy.Subscriber(self.topic_name_pos_err, Pose, self.pos_err_callback)
-        self.sub_pos_track = rospy.Subscriber(self.topic_name_pos_track, TrackPosition, self.pos_track_callback)
+        self.sub_camera = rospy.Subscriber(self.topic_name_camera_image, Image, self.image_callback, queue_size=10)
+        self.sub_pos_err = rospy.Subscriber(self.topic_name_pos_err, Pose, self.pos_err_callback, queue_size=10)
+        self.sub_pos_track = rospy.Subscriber(self.topic_name_pos_track, TrackPosition, self.pos_track_callback, queue_size=10)
         self.pub_manual_mode = rospy.Publisher(self.topic_name_manual_mode, Bool, queue_size=10)
         self.pub_control = rospy.Publisher(self.topic_name_control, AckermannDrive, queue_size=10)
         #rospy.spin()
