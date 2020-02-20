@@ -74,11 +74,11 @@ class Visualizer():
 
         np_arr = np.frombuffer(img_msg.data, dtype=np.uint8)
 
-        if img_msg.encoding == '8UC1':
+        if img_msg.encoding == 'bgr8':
+            self.img = np_arr.reshape((self.height, self.width, 3))
+        elif img_msg.encoding == '8UC1' or img_msg.encoding == 'mono8':
             gray = np_arr.reshape((self.height, self.width, 1))
             self.img = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)
-        elif img_msg.encoding == 'bgr8':
-            self.img = np_arr.reshape((self.height, self.width, 3))
 
     def pos_err_callback(self, err_msg):
         self.pos = int(err_msg.position.x)
@@ -112,7 +112,7 @@ class Visualizer():
 
         if self.manual_mode:
             speed = controller.get_default_speed()
-            cv2.putText(img, f"Manual mode: ON, speed = {speed:d}", (10, height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
+            cv2.putText(img, f"Manual mode: ON, speed = {speed:.2f}", (10, height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
 
         cv2.imshow("Visualizer", img)
         key = cv2.waitKey(33)
@@ -126,7 +126,10 @@ class Visualizer():
 if __name__ == "__main__":
     cv2.namedWindow("Visualizer")
     rospy.init_node("visualizer")
-    controller = Controller()
+
+    default_speed = rospy.get_param("~default_speed", "150")
+
+    controller = Controller(default_speed = default_speed)
     listener = Listener(on_press=controller.on_press, on_release=controller.on_release)
     listener.start()
 
