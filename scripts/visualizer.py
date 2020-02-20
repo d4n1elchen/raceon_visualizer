@@ -26,12 +26,14 @@ class Visualizer():
         self.topic_name_pos_track = rospy.get_param("~topic_name_position_track", "position/track")
 
         # Parameter name
-        self.param_name_scan_line = rospy.get_param("~param_name_scan_line", "scan_line")
+        self.param_name_scan_line_d = rospy.get_param("~param_name_scan_line", "scan_line_d")
+        self.param_name_scan_line_u = rospy.get_param("~param_name_scan_line", "scan_line_u")
         self.param_name_track_width = rospy.get_param("~param_name_track_width", "track_width")
         self.param_name_camera_center = rospy.get_param("~param_name_camera_center", "camera_center")
 
         # Parameters for vis
-        self.scan_line = rospy.get_param(self.param_name_scan_line, 170)
+        self.scan_line_d = rospy.get_param(self.param_name_scan_line_d, 170)
+        self.scan_line_u = rospy.get_param(self.param_name_scan_line_u, 170)
         self.track_width = rospy.get_param(self.param_name_track_width, 600)
         self.camera_center = rospy.get_param(self.param_name_camera_center, 320)
 
@@ -74,7 +76,7 @@ class Visualizer():
 
         np_arr = np.frombuffer(img_msg.data, dtype=np.uint8)
 
-        if img_msg.encoding == '8UC1':
+        if img_msg.encoding == 'mono8':
             gray = np_arr.reshape((self.height, self.width, 1))
             self.img = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)
         elif img_msg.encoding == 'bgr8':
@@ -87,21 +89,23 @@ class Visualizer():
         self.left = int(track_msg.left)
         self.right = int(track_msg.right)
 
+    def plot_scan_line(self, img, scan_line):
+        cv2.line(img, (0, scan_line), (self.width, scan_line), (255,255,255), self.line_width_params)
+        cv2.line(img, (self.camera_center, scan_line-20), (self.camera_center, scan_line+20), (0,255,255), self.line_width_params)
+        cv2.line(img, (self.camera_center-self.track_width//2, scan_line-20), (self.camera_center-self.track_width//2, scan_line+20), (0,0,255), self.line_width_params)
+        cv2.line(img, (self.camera_center+self.track_width//2, scan_line-20), (self.camera_center+self.track_width//2, scan_line+20), (0,0,255), self.line_width_params)
+
     def plot(self):
         img = self.img.copy()
-        width = self.width
-        height = self.height
 
-        cv2.line(img, (0, self.scan_line), (width, self.scan_line), (255,255,255), self.line_width_params)
-        cv2.line(img, (self.camera_center, self.scan_line-20), (self.camera_center, self.scan_line+20), (0,255,255), self.line_width_params)
-        cv2.line(img, (self.camera_center-self.track_width//2, self.scan_line-20), (self.camera_center-self.track_width//2, self.scan_line+20), (0,0,255), self.line_width_params)
-        cv2.line(img, (self.camera_center+self.track_width//2, self.scan_line-20), (self.camera_center+self.track_width//2, self.scan_line+20), (0,0,255), self.line_width_params)
+        self.plot_scan_line(img, self.scan_line_u)
+        self.plot_scan_line(img, self.scan_line_d)
 
-        cv2.line(img, (self.camera_center-self.pos, 0), (self.camera_center-self.pos, height), (255,0,255), self.line_width_indicator)
+        cv2.line(img, (self.camera_center-self.pos, 0), (self.camera_center-self.pos, self.height), (255,0,255), self.line_width_indicator)
         if(self.left):
-            cv2.line(img, (self.left, 0), (self.left, height), (0,255,0), self.line_width_indicator)
+            cv2.line(img, (self.left, 0), (self.left, self.height), (0,255,0), self.line_width_indicator)
         if(self.right):
-            cv2.line(img, (self.right, 0), (self.right, height), (0,255,0), self.line_width_indicator)
+            cv2.line(img, (self.right, 0), (self.right, self.height), (0,255,0), self.line_width_indicator)
 
         if self.frame_cnt == 0:
             self.time = time.time()
@@ -112,7 +116,7 @@ class Visualizer():
 
         if self.manual_mode:
             speed = controller.get_default_speed()
-            cv2.putText(img, f"Manual mode: ON, speed = {speed:d}", (10, height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
+            cv2.putText(img, f"Manual mode: ON, speed = {speed:d}", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
 
         cv2.imshow("Visualizer", img)
         key = cv2.waitKey(33)
