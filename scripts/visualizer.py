@@ -26,14 +26,12 @@ class Visualizer():
         self.topic_name_pos_track = rospy.get_param("~topic_name_position_track", "position/track")
 
         # Parameter name
-        self.param_name_scan_line_d = rospy.get_param("~param_name_scan_line", "scan_line_d")
-        self.param_name_scan_line_u = rospy.get_param("~param_name_scan_line", "scan_line_u")
+        self.param_name_scan_line = rospy.get_param("~param_name_scan_line", "scan_line")
         self.param_name_track_width = rospy.get_param("~param_name_track_width", "track_width")
         self.param_name_camera_center = rospy.get_param("~param_name_camera_center", "camera_center")
 
         # Parameters for vis
-        self.scan_line_d = rospy.get_param(self.param_name_scan_line_d, 170)
-        self.scan_line_u = rospy.get_param(self.param_name_scan_line_u, 170)
+        self.scan_line = rospy.get_param(self.param_name_scan_line, 170)
         self.track_width = rospy.get_param(self.param_name_track_width, 600)
         self.camera_center = rospy.get_param(self.param_name_camera_center, 320)
 
@@ -98,8 +96,7 @@ class Visualizer():
     def plot(self):
         img = self.img.copy()
 
-        self.plot_scan_line(img, self.scan_line_u)
-        self.plot_scan_line(img, self.scan_line_d)
+        self.plot_scan_line(img, self.scan_line)
 
         cv2.line(img, (self.camera_center-self.pos, 0), (self.camera_center-self.pos, self.height), (255,0,255), self.line_width_indicator)
         if(self.left):
