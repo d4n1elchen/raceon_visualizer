@@ -113,7 +113,7 @@ class Visualizer():
 
         if self.manual_mode:
             speed = controller.get_default_speed()
-            cv2.putText(img, f"Manual mode: ON, speed = {speed:.2f}", (10, height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
+            cv2.putText(img, f"Manual mode: ON, speed = {speed:.2f}", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
 
         cv2.imshow("Visualizer", img)
         key = cv2.waitKey(33)
