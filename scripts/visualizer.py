@@ -37,6 +37,7 @@ class Visualizer():
         self.track_width = rospy.get_param(self.param_name_track_width, 600)
         self.camera_center = rospy.get_param(self.param_name_camera_center, 320)
 
+        self.speed = 0
         self.img = np.zeros(shape=[480, 640, 3], dtype=np.uint8)
         self.width = 640
         self.height = 480
@@ -61,6 +62,7 @@ class Visualizer():
         self.sub_camera = rospy.Subscriber(self.topic_name_camera_image, Image, self.image_callback, queue_size=10)
         self.sub_pos_err = rospy.Subscriber(self.topic_name_pos_err, Pose, self.pos_err_callback, queue_size=10)
         self.sub_pos_track = rospy.Subscriber(self.topic_name_pos_track, TrackPosition, self.pos_track_callback, queue_size=10)
+        self.sub_control = rospy.Subscriber(self.topic_name_control, AckermannDrive, self.control_callback, queue_size=10)
         self.pub_manual_mode = rospy.Publisher(self.topic_name_manual_mode, Bool, queue_size=10)
         self.pub_control = rospy.Publisher(self.topic_name_control, AckermannDrive, queue_size=10)
         #rospy.spin()
@@ -81,6 +83,9 @@ class Visualizer():
         elif img_msg.encoding == '8UC1' or img_msg.encoding == 'mono8':
             gray = np_arr.reshape((self.height, self.width, 1))
             self.img = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)
+
+    def control_callback(self, control_msg):
+        self.speed = control_msg.speed
 
     def pos_err_callback(self, err_msg):
         self.pos = int(err_msg.position.x)
@@ -115,8 +120,10 @@ class Visualizer():
         cv2.putText(img, f"{self.fps:.3f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,0), 2)
 
         if self.manual_mode:
-            speed = controller.get_default_speed()
-            cv2.putText(img, f"Manual mode: ON, speed = {speed:.2f}", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
+            set_speed = controller.get_default_speed()
+            cv2.putText(img, f"Manual mode, speed = {self.speed:.2f} (set: {set_speed:.2f})", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
+        else:
+            cv2.putText(img, f"Autodr mode, speed = {self.speed:.2f}", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
 
         cv2.imshow("Visualizer", img)
         key = cv2.waitKey(33)
