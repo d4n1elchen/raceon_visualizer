@@ -10,7 +10,8 @@
             <param name="~topic_name_position_track" value="position/track" />
             <param name="~topic_name_control" value="control" />
             <param name="~topic_name_manual_mode" value="control/manual_mode" />
-            <param name="~param_name_scan_line" value="pos_estimation/scan_line" />
+            <param name="~param_name_scan_line_d" value="pos_estimation/scan_line_d" />
+            <param name="~param_name_scan_line_u" value="pos_estimation/scan_line_u" />
             <param name="~param_name_track_width" value="pos_estimation/track_width" />
             <param name="~param_name_camera_center" value="pos_estimation/camera_center" />
         </node>

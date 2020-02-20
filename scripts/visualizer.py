@@ -26,8 +26,8 @@ class Visualizer():
         self.topic_name_pos_track = rospy.get_param("~topic_name_position_track", "position/track")
 
         # Parameter name
-        self.param_name_scan_line_d = rospy.get_param("~param_name_scan_line", "scan_line_d")
-        self.param_name_scan_line_u = rospy.get_param("~param_name_scan_line", "scan_line_u")
+        self.param_name_scan_line_d = rospy.get_param("~param_name_scan_line_d", "scan_line_d")
+        self.param_name_scan_line_u = rospy.get_param("~param_name_scan_line_u", "scan_line_u")
         self.param_name_track_width = rospy.get_param("~param_name_track_width", "track_width")
         self.param_name_camera_center = rospy.get_param("~param_name_camera_center", "camera_center")
 
@@ -116,7 +116,7 @@ class Visualizer():
 
         if self.manual_mode:
             speed = controller.get_default_speed()
-            cv2.putText(img, f"Manual mode: ON, speed = {speed:.2f}", (10, height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
+            cv2.putText(img, f"Manual mode: ON, speed = {speed:.2f}", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
 
         cv2.imshow("Visualizer", img)
         key = cv2.waitKey(33)
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     cv2.namedWindow("Visualizer")
     rospy.init_node("visualizer")
 
-    default_speed = rospy.get_param("~default_speed", "150")
+    default_speed = rospy.get_param("~default_speed", 150)
 
     controller = Controller(default_speed = default_speed)
     listener = Listener(on_press=controller.on_press, on_release=controller.on_release)
