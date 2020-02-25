@@ -138,7 +138,7 @@ if __name__ == "__main__":
     cv2.namedWindow("Visualizer")
     rospy.init_node("visualizer")
 
-    default_speed = rospy.get_param("~default_speed", 150)
+    default_speed = rospy.get_param("~default_speed", 200)
 
     controller = Controller(default_speed = default_speed)
     listener = Listener(on_press=controller.on_press, on_release=controller.on_release)
