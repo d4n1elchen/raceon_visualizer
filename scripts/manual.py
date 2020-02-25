@@ -13,6 +13,7 @@ class Controller:
 
         self.speed = 0
         self.steering = 0
+        self.steering_direction = 0
         self.terminate = False
 
     def on_press(self, key):
@@ -21,23 +22,30 @@ class Controller:
         elif key == KeyCode.from_char('j'):
             self.speed = -self.default_speed
         elif key == KeyCode.from_char('h'):
-            self.steering = -self.default_steering
+            self.steering_direction = -1
         elif key == KeyCode.from_char('k'):
-            self.steering = self.default_steering
+            self.steering_direction = 1
         elif key == KeyCode.from_char('a'):
             self.default_speed += 5
         elif key == KeyCode.from_char('z'):
             self.default_speed -= 5
+        elif key == KeyCode.from_char('c'):
+            if self.default_steering < 1000:
+                self.default_steering += 100
+        elif key == KeyCode.from_char('x'):
+            if self.default_steering > 0:
+                self.default_steering -= 100
 
     def on_release(self, key):
         if key == KeyCode.from_char('u') or key == KeyCode.from_char('j'):
             self.speed = 0
         elif key == KeyCode.from_char('h') or key == KeyCode.from_char('k'):
-            self.steering = 0
+            self.steering_direction = 0
         elif key == KeyCode.from_char('q'):
             self.terminate = True
 
     def get_msg(self):
+        self.steering = self.default_steering * self.steering_direction
         control_msg = AckermannDrive()
         control_msg.speed = self.speed
         control_msg.steering_angle = self.steering
