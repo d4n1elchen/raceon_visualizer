@@ -34,6 +34,8 @@ class Visualizer():
 
         # Parameters for vis
         self.scan_line = rospy.get_param(self.param_name_scan_line, 170)
+        self.scan_line_d = rospy.get_param(self.param_name_scan_line_d, self.scan_line)
+        self.scan_line_u = rospy.get_param(self.param_name_scan_line_u, self.scan_line)
         self.track_width = rospy.get_param(self.param_name_track_width, 600)
         self.camera_center = rospy.get_param(self.param_name_camera_center, 320)
 
@@ -105,7 +107,8 @@ class Visualizer():
     def plot(self):
         img = self.img.copy()
 
-        self.plot_scan_line(img, self.scan_line)
+        self.plot_scan_line(img, self.scan_line_d)
+        self.plot_scan_line(img, self.scan_line_u)
 
         if self.left != 0 and self.right != 0:
             cv2.putText(img, f"{self.right - self.left:d}", (self.width - 80, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,255), 2)
@@ -126,7 +129,7 @@ class Visualizer():
         if self.manual_mode:
             set_speed = controller.get_default_speed()
             set_steering = controller.get_default_steering()
-            cv2.putText(img, f"Manual mode, speed = {self.speed:.2f} (set: {speed:.2f}/{steering:.2f})", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2)
+            cv2.putText(img, f"Manual mode, speed = {self.speed:.2f} (set: {set_speed:.2f}/{set_steering:.2f})", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2)
         else:
             cv2.putText(img, f"Autodr mode, speed = {self.speed:.2f}", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
 
