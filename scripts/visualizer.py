@@ -129,7 +129,7 @@ class Visualizer():
         if self.manual_mode:
             set_speed = controller.get_default_speed()
             set_steering = controller.get_default_steering()
-            cv2.putText(img, f"Manual mode, speed = {self.speed:.2f} (set: {set_speed:.2f}/{set_steering:.2f})", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2)
+            cv2.putText(img, f"Manual mode, speed = {self.speed:.2f} (set: {set_speed:.2f}/{set_steering:.2f})", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
         else:
             cv2.putText(img, f"Autodr mode, speed = {self.speed:.2f}", (10, self.height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
 
