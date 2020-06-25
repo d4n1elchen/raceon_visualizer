@@ -17,6 +17,9 @@ import numpy as np
 from manual import Controller
 from pynput.keyboard import Listener
 
+# Process control
+import signal
+
 class Visualizer():
 
     def __init__(self, controller):
@@ -56,14 +59,19 @@ class Visualizer():
         self.topic_name_control = rospy.get_param("~topic_name_control", "control")
         self.manual_mode = False
 
+        # Interrupt handler
+        self.terminate = False
+        def handler(signum, frame):
+            self.terminate = True
+        signal.signal(signal.SIGINT, handler)
+
     def start(self):
         self.sub_camera = rospy.Subscriber(self.topic_name_camera_image, Image, self.image_callback, queue_size=10)
         self.sub_pos_pose = rospy.Subscriber(self.topic_name_pos_pose, Pose, self.pos_pose_callback, queue_size=10)
         self.sub_pos_track = rospy.Subscriber(self.topic_name_pos_track, TrackPosition, self.pos_track_callback, queue_size=10)
         self.pub_manual_mode = rospy.Publisher(self.topic_name_manual_mode, Bool, queue_size=10)
         self.pub_control = rospy.Publisher(self.topic_name_control, AckermannDrive, queue_size=10)
-        #rospy.spin()
-        self.terminate = False
+
         while not self.terminate:
             self.plot()
             if self.manual_mode:
@@ -141,10 +149,7 @@ if __name__ == "__main__":
     listener.start()
 
     visualizer = Visualizer(controller)
-    try:
-        visualizer.start()
-    except rospy.ROSInterruptException:
-        pass
+    visualizer.start()
 
     cv2.destroyAllWindows()
 
